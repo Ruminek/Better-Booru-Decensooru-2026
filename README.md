@@ -1,5 +1,8 @@
 [README.md](https://github.com/user-attachments/files/31900960/README.md)
 
+<img width="2708" height="479" alt="image" src="https://github.com/user-attachments/assets/451b0db1-4c6f-49a3-ac4e-52427c1c5bbc" />
+
+
 # better_better_booru — 2025 lineage revival (BBB + decensooru)
 
 A single-file userscript for **Danbooru** (`*://*.donmai.us/*`), continuing the
