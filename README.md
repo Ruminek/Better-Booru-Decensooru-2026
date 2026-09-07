@@ -1,6 +1,4 @@
 [README.md](https://github.com/user-attachments/files/31900960/README.md)
-# Better-Booru-Decensooru-2026
-Userscript for Danbooru: BBB 8.3.7 fork (otani→Jawertae→Hfaify lineage) with revived decensooru integration. Fixes BBB boot on modern Danbooru, restores hidden/gold-gated media via the 
 
 # better_better_booru — 2025 lineage revival (BBB + decensooru)
 
