@@ -3,9 +3,9 @@
 // @namespace      https://greasyfork.org/scripts/3575-better-better-booru
 // @author         otani, modified by Jawertae, fixed by Hfaify, revived by OpenCode.
 // @description    Several changes to make Danbooru much better. 2025 lineage: fixes BBB boot on modern Danbooru (packs/js assets), isLoggedIn/getPaginator/account reads, grid-fill race, and integrates a revived decensooru (hash-dump DB + CDN thumb restoration).
-// @version        8.3.7
-// @updateURL      https://raw.githubusercontent.com/Ruminek/Better-Booru-Decensooru-2026/main/bbb-2025-decensor-fixed.user.js
-// @downloadURL    https://raw.githubusercontent.com/Ruminek/Better-Booru-Decensooru-2026/main/bbb-2025-decensor-fixed.user.js
+// @version        8.3.8
+// @updateURL      https://raw.githubusercontent.com/Rickormous/Better-Booru-Decensooru-2026/main/bbb-2025-decensor-fixed.user.js
+// @downloadURL    https://raw.githubusercontent.com/Rickormous/Better-Booru-Decensooru-2026/main/bbb-2025-decensor-fixed.user.js
 // @match          *://*.donmai.us/*
 // @connect        https://isshiki.donmai.us
 // @connect        raw.githubusercontent.com
@@ -386,6 +386,7 @@ function bbbScript() { // Wrapper for injecting the script into the document.
 			comment_score: newOption("checkbox", false, "Comment Scores", "Make comment scores visible by adding them as direct links to their respective comments."),
 			custom_status_borders: newOption("checkbox", false, "Custom Status Borders", "Override Danbooru's thumbnail borders for deleted, flagged, pending, parent, and child images."),
 			custom_tag_borders: newOption("checkbox", true, "Custom Tag Borders", "Add thumbnail borders to posts with specific tags."),
+			dark_mode: newOption("dropdown", "auto", "Dark Mode", "Use a dark theme for the BBB menu, dialogs, notices, and other script elements. <tipdesc>Disabled:</tipdesc> Always use the light theme. <tipdesc>Auto:</tipdesc> Follow your system's color scheme. <tipdesc>Enabled:</tipdesc> Always use the dark theme.", {txtOptions:["Disabled:disabled", "Auto:auto", "Enabled:enabled"]}),
 			direct_downloads: newOption("checkbox", false, "Direct Downloads", "Allow download managers to download the posts displayed in the favorites, search, pool, popular, and favorite group listings. <tiphead>Note</tiphead>Posts filtered out by the blacklist or quick search will not provide direct downloads until the blacklist entry or quick search affecting them is disabled."),
 			disable_embedded_notes: newOption("checkbox", false, "Disable Embedded Notes", "Force posts with embedded notes to display with the original note styling. <tiphead>Notes</tiphead>While notes will display with the original styling, the actual post settings will still have embedded notes set to enabled. <br><br>Due to the actual settings, users that may wish to edit notes will have to edit the notes with the embedded note styling so that nothing ends up breaking in unexpected ways. When toggling translation mode or opening the edit note dialog box, the notes will automatically revert back to the original embedded notes until the page is reloaded. <br><br>Note resizing and moving will be allowed without the reversion to embedded notes since this ability is sometimes necessary for badly positioned notes. Any note resizing or moving done as a part of intended note editing should be done <b>after</b> triggering the embedded note reversion since any changes before it will be lost."),
 			disable_tagged_filenames: newOption("checkbox", false, "Disable Tagged Filenames", "Remove the tag information from post filenames and only leave the original md5 hash. <tiphead>Note</tiphead>For logged in users with their account's \"disable tagged filenames\" setting set to \"yes\", this option must be enabled for consistent behavior on hidden posts. <br><br>For logged in users with their account's \"disable tagged filenames\" setting set to \"no\" and logged out users, this option can be enabled to remove the tags from filenames without having to use an account setting."),
@@ -472,7 +473,7 @@ function bbbScript() { // Wrapper for injecting the script into the document.
 			groups: newSection("group", "tag_groups", "Groups", "Tags that are frequently used together or that need to be coordinated between multiple places may be grouped together and saved here for use with the \"group\" metatag."),
 			notices: newSection("general", ["show_resized_notice", "minimize_status_notices", "hide_sign_up_notice", "hide_upgrade_notice", "hide_hidden_notice", "hide_tos_notice", "hide_comment_notice", "hide_tag_notice", "hide_upload_notice", "hide_pool_notice", "hide_ban_notice"], "Notices"),
 			sidebar: newSection("general", ["remove_tag_headers", "post_tag_scrollbars", "search_tag_scrollbars", "autohide_sidebar", "fixed_sidebar", "collapse_sidebar"], "Tag Sidebar"),
-			misc: newSection("general", ["direct_downloads", "track_new", "clean_links", "post_tag_titles", "search_add", "page_counter", "comment_score", "quick_search"], "Misc."),
+			misc: newSection("general", ["direct_downloads", "track_new", "clean_links", "post_tag_titles", "search_add", "page_counter", "comment_score", "quick_search", "dark_mode"], "Misc."),
 			misc_layout: newSection("general", ["fixed_paginator", "hide_fav_button", "add_popular_link", "add_random_post_link"], "Misc."),
 			script_settings: newSection("general", ["bypass_api", "manage_cookies", "enable_status_message", "enable_menu_autocomplete", "resize_link_style", "override_blacklist", "override_resize", "override_sample", "disable_tagged_filenames", "thumbnail_count_default"], "Script Settings"),
 			status_borders: newSection("border", "status_borders", "Custom Status Borders", "When using custom status borders, the borders can be edited here. For easy color selection, use one of the many free tools on the internet like <a target=\"_blank\" href=\"http://www.quackit.com/css/css_color_codes.cfm\">this one</a>."),
@@ -540,6 +541,7 @@ function bbbScript() { // Wrapper for injecting the script into the document.
 	var override_sample = bbb.user.override_sample;
 	var disable_tagged_filenames = bbb.user.disable_tagged_filenames;
 	var track_new = bbb.user.track_new;
+	var dark_mode = bbb.user.dark_mode;
 
 	var add_popular_link = bbb.user.add_popular_link;
 	var add_random_post_link = bbb.user.add_random_post_link;
@@ -8035,6 +8037,27 @@ function bbbScript() { // Wrapper for injecting the script into the document.
 		if (hide_fav_button)
 			styles += '.fav-buttons {display: none !important;}';
 
+		// Dark mode for all BBB interface elements (menu, dialogs, notices, quick search, endless buttons, tooltips).
+		var darkModeActive = (dark_mode === "enabled" || (dark_mode === "auto" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches));
+
+		if (darkModeActive) {
+			if (document.body)
+				document.body.classList.add("bbb-dark");
+
+			styles += 'body.bbb-dark #bbb-menu, body.bbb-dark #bbb-dialog-window, body.bbb-dark #bbb-quick-search, body.bbb-dark #bbb-endless-load-div, body.bbb-dark #bbb-endless-enable-div {background-color: #1e1e1e; border-color: #444444; color: #e8e8e8;}';
+			styles += 'body.bbb-dark #bbb-menu *, body.bbb-dark #bbb-dialog-window *, body.bbb-dark #bbb-quick-search * {color: #e8e8e8;}';
+			styles += 'body.bbb-dark #bbb-menu a, body.bbb-dark #bbb-dialog-window a, body.bbb-dark #bbb-quick-search a, body.bbb-dark .bbb-edit-link, body.bbb-dark .bbb-expl-link {color: #6cb2f5;}';
+			styles += 'body.bbb-dark #bbb-menu input, body.bbb-dark #bbb-menu select, body.bbb-dark #bbb-menu textarea, body.bbb-dark #bbb-dialog-window input, body.bbb-dark #bbb-dialog-window select, body.bbb-dark #bbb-dialog-window textarea, body.bbb-dark #bbb-quick-search input, body.bbb-dark .bbb-general-input, body.bbb-dark .bbb-edit-area, body.bbb-dark .bbb-backup-area, body.bbb-dark .bbb-blacklist-area {background-color: #2d2d2d; border-color: #555555; color: #e8e8e8;}';
+			styles += 'body.bbb-dark .bbb-tab, body.bbb-dark .bbb-button, body.bbb-dark .bbb-dialog-button, body.bbb-dark .bbb-list-button, body.bbb-dark .bbb-header {background-color: #2d2d2d; border-color: #555555; color: #e8e8e8;}';
+			styles += 'body.bbb-dark .bbb-general-label:hover, body.bbb-dark .bbb-active-tab, body.bbb-dark .bbb-quick-search-active {background-color: #333333;}';
+			styles += 'body.bbb-dark .bbb-section-options, body.bbb-dark .bbb-list-div, body.bbb-dark .bbb-dialog-content-div, body.bbb-dark .bbb-list-settings, body.bbb-dark .bbb-toc {background-color: #1e1e1e; border-color: #444444;}';
+			styles += 'body.bbb-dark .bbb-list-divider, body.bbb-dark .bbb-list-spacer, body.bbb-dark .bbb-endless-divider {border-color: #444444;}';
+			styles += 'body.bbb-dark #bbb-status {background-color: rgba(30,30,30,0.85); border-color: rgba(85,85,85,0.85); color: #e8e8e8;}';
+			styles += 'body.bbb-dark #bbb-notice {background-color: #333333; color: #e8e8e8;}';
+			styles += 'body.bbb-dark #bbb-expl, body.bbb-dark #bbb-blacklist-tip {background-color: #252526; border-color: #555555; color: #e8e8e8;}';
+			styles += 'body.bbb-dark #bbb-dialog-blocker {background-color: rgba(0,0,0,0.6);}';
+		}
+
 		customStyles.innerHTML = styles;
 		document.getElementsByTagName("head")[0].appendChild(customStyles);
 	}
@@ -8839,7 +8862,7 @@ function bbbScript() { // Wrapper for injecting the script into the document.
 		var sidebarTop = bbb.fixed_sidebar.top;
 		var sidebarLeft = bbb.fixed_sidebar.left;
 		var verScrolled = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-		var horScrolled = window.payeXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+		var horScrolled = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
 		var sidebarHeight = sidebar.clientHeight; // Height can potentially change (blacklist update, etc.) so always recalculate it.
 		var contentHeight = content.clientHeight;
 		var viewHeight = document.documentElement.clientHeight;
