@@ -4,8 +4,8 @@
 // @author         otani, modified by Jawertae, fixed by Hfaify, revived by OpenCode.
 // @description    Several changes to make Danbooru much better. 2025 lineage: fixes BBB boot on modern Danbooru (packs/js assets), isLoggedIn/getPaginator/account reads, grid-fill race, and integrates a revived decensooru (hash-dump DB + CDN thumb restoration).
 // @version        8.3.8
-// @updateURL      https://raw.githubusercontent.com/Rickormous/Better-Booru-Decensooru-2026/main/bbb-2025-decensor-fixed.user.js
-// @downloadURL    https://raw.githubusercontent.com/Rickormous/Better-Booru-Decensooru-2026/main/bbb-2025-decensor-fixed.user.js
+// @updateURL      https://raw.githubusercontent.com/Ruminek/Better-Booru-Decensooru-2026/main/bbb-2025-decensor-fixed.user.js
+// @downloadURL    https://raw.githubusercontent.com/Ruminek/Better-Booru-Decensooru-2026/main/bbb-2025-decensor-fixed.user.js
 // @match          *://*.donmai.us/*
 // @connect        https://isshiki.donmai.us
 // @connect        raw.githubusercontent.com
